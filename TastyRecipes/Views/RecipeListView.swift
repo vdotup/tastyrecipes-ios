@@ -13,25 +13,49 @@ struct RecipeListView: View {
     
     var body: some View {
         NavigationView {
-            Group {
-                if viewModel.isLoading && viewModel.recipes.isEmpty {
-                    ProgressView()
-                } else if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                } else {
-                    List(viewModel.recipes, id: \.id) { recipe in
-                        NavigationLink {
-                            RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))
-                        } label: {
-                            Text(recipe.name)
-                                .onAppear {
-                                    Task {
-                                        await viewModel.loadMoreRecipesIfNeeded(currentRecipe: recipe)
-                                    }
-                                }
+            VStack {
+                HStack {
+                    TextField("Search recipes...", text: $viewModel.searchQuery)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit {
+                            Task {
+                                await viewModel.search()
+                            }
                         }
+                    
+                    Button {
+                        Task {
+                            await viewModel.search()
+                        }
+                    } label: {
+                        Image(systemName: "magnifyingglass")
                     }
                 }
+                .padding(.horizontal)
+                
+                Button {
+                    viewModel.toggleSort()
+                } label: {
+                    Text(viewModel.sortAscending ? "Sort Desc" : "Sort Asc")
+                }
+                .padding(.bottom, 4)
+                
+                List(viewModel.recipes, id: \.id) { recipe in
+                    NavigationLink {
+                        RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))
+                    } label: {
+                        Text(recipe.name)
+                            .onAppear {
+                                Task {
+                                    await viewModel.loadMoreRecipesIfNeeded(currentRecipe: recipe)
+                                }
+                            }
+                    }
+                }
+                .refreshable {
+                    await viewModel.refresh()
+                }
+                .listStyle(.plain)
             }
             .navigationTitle("Recipes")
         }
