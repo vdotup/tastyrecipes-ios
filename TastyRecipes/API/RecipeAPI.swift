@@ -17,6 +17,9 @@ struct RecipeAPI: RecipeAPIProtocol {
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
+        let dataString = String(data: data, encoding: .utf8)
+        print(dataString)
+        
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200
         else {
