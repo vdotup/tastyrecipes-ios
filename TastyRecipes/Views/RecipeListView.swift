@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct RecipeListView: View {
-    
     @StateObject private var viewModel = RecipeListViewModel()
+    
+    init(api: RecipeAPIProtocol = RecipeAPI()) {
+        _viewModel = StateObject(wrappedValue: RecipeListViewModel(api: api))
+    }
     
     var body: some View {
         NavigationView {
@@ -34,7 +37,9 @@ struct RecipeListView: View {
                 .padding(.horizontal)
                 
                 Button {
-                    viewModel.toggleSort()
+                    withAnimation {
+                        viewModel.toggleSort()
+                    }
                 } label: {
                     Text(viewModel.sortAscending ? "Sort Desc" : "Sort Asc")
                 }
@@ -56,6 +61,7 @@ struct RecipeListView: View {
                     await viewModel.refresh()
                 }
                 .listStyle(.plain)
+                .animation(.default, value: viewModel.recipes)
             }
             .navigationTitle("Recipes")
         }
@@ -66,5 +72,27 @@ struct RecipeListView: View {
 }
 
 #Preview {
-    RecipeListView()
+    RecipeListView(api: MockRecipeAPI())
+}
+
+struct MockRecipeAPI: RecipeAPIProtocol {
+    func fetchRecipes(skip: Int, limit: Int) async throws -> RecipeResponse {
+        let sampleRecipes = [
+            Recipe(
+                id: 1, name: "Mock1", ingredients: [], instructions: [], prepTimeMinutes: 0,
+                cookTimeMinutes: 0, servings: 0, difficulty: "", cuisine: "", caloriesPerServing: 0,
+                tags: [], userId: 0, image: "", rating: 0, reviewCount: 0, mealType: []
+            ),
+            Recipe(
+                id: 2, name: "Mock2", ingredients: [], instructions: [], prepTimeMinutes: 0,
+                cookTimeMinutes: 0, servings: 0, difficulty: "", cuisine: "", caloriesPerServing: 0,
+                tags: [], userId: 0, image: "", rating: 0, reviewCount: 0, mealType: []
+            )
+        ]
+        return RecipeResponse(recipes: sampleRecipes, total: 2, skip: 0, limit: 2)
+    }
+    
+    func searchRecipes(query: String) async throws -> [Recipe] {
+        return []
+    }
 }

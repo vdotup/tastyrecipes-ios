@@ -16,7 +16,8 @@ class RecipeListViewModel: ObservableObject {
     @Published var searchQuery = ""
     @Published var sortAscending = true
     
-    private let api: RecipeAPIProtocol
+    let api: RecipeAPIProtocol
+    
     private var skip = 0
     private let limit = 2
     private var canLoadMore = true
