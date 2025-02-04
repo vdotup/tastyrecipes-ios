@@ -8,6 +8,10 @@
 import Foundation
 
 protocol RecipeAPIProtocol {
-    func fetchRecipes(skip: Int, limit: Int) async throws -> RecipeResponse
-    func searchRecipes(query: String) async throws -> [Recipe]
+    func fetchRecipes(skip: Int, limit: Int, sortBy: String?, order: String?) async throws -> RecipeResponse
+    func searchRecipes(query: String, skip: Int, limit: Int, sortBy: String?, order: String?) async throws -> RecipeResponse
+    func fetchTags() async throws -> [String]
+    func fetchRecipesByTag(_ tag: String, skip: Int, limit: Int, sortBy: String?, order: String?) async throws -> RecipeResponse
+    func fetchRecipesByMeal(_ meal: String, skip: Int, limit: Int, sortBy: String?, order: String?) async throws -> RecipeResponse
 }
+

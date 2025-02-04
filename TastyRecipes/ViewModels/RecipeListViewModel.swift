@@ -10,12 +10,17 @@ import SwiftUI
 @MainActor
 class RecipeListViewModel: ObservableObject {
     @Published var recipes: [Recipe] = []
-    @Published var filteredRecipes: [Recipe] = []
-    @Published var searchQuery = ""
-    @Published var sortAscending = true
+    @Published var topRated: [Recipe] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    private let api: RecipeAPIProtocol
+    @Published var isAscending = true
+    @Published var sortBy = "name"
+    @Published var tags: [String] = []
+    @Published var selectedTag: String?
+    @Published var meals: [String] = []
+    
+    let api: RecipeAPIProtocol
+    
     private var skip = 0
     private let limit = 20
     private var canLoadMore = true
@@ -24,18 +29,20 @@ class RecipeListViewModel: ObservableObject {
         self.api = api
     }
 
-    func loadInitialRecipes() async {
+    func loadInitialData() async {
         isLoading = true
         errorMessage = nil
         skip = 0
         canLoadMore = true
         do {
-            let response = try await api.fetchRecipes(skip: skip, limit: limit)
+            let order = isAscending ? "asc" : "desc"
+            let response = try await api.fetchRecipes(skip: skip, limit: limit, sortBy: sortBy, order: order)
             recipes = response.recipes
-            filteredRecipes = response.recipes
             skip += limit
             canLoadMore = response.recipes.count == limit
-            sortIfNeeded()
+            topRated = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "rating", order: "desc").recipes
+            tags = try await api.fetchTags()
+            meals = ["Breakfast", "Lunch", "Dinner"]
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -43,16 +50,16 @@ class RecipeListViewModel: ObservableObject {
     }
 
     func loadMoreRecipesIfNeeded(currentRecipe: Recipe) async {
-        guard canLoadMore else { return }
-        guard let index = filteredRecipes.firstIndex(where: { $0.id == currentRecipe.id }) else { return }
-        if index > filteredRecipes.count - 5 && !isLoading {
+        guard canLoadMore, !isLoading else { return }
+        guard let index = recipes.firstIndex(where: { $0.id == currentRecipe.id }) else { return }
+        if index > recipes.count - 5 {
             isLoading = true
             do {
-                let response = try await api.fetchRecipes(skip: skip, limit: limit)
+                let order = isAscending ? "asc" : "desc"
+                let response = try await api.fetchRecipes(skip: skip, limit: limit, sortBy: sortBy, order: order)
                 recipes.append(contentsOf: response.recipes)
                 skip += limit
                 canLoadMore = response.recipes.count == limit
-                filterAndSortRecipes()
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -61,33 +68,58 @@ class RecipeListViewModel: ObservableObject {
     }
 
     func refresh() async {
-        await loadInitialRecipes()
+        await loadInitialData()
     }
 
-    func search() async {
-        filterAndSortRecipes()
-    }
-
-    func toggleSort() {
-        sortAscending.toggle()
-        filterAndSortRecipes()
-    }
-
-    private func filterAndSortRecipes() {
-        if searchQuery.isEmpty {
-            filteredRecipes = recipes
-        } else {
-            filteredRecipes = recipes.filter { $0.name.localizedCaseInsensitiveContains(searchQuery) }
+    func setAscending(_ value: Bool) {
+        isAscending = value
+        Task {
+            await loadInitialData()
         }
-        sortIfNeeded()
     }
 
-    func sortIfNeeded() {
-        if sortAscending {
-            filteredRecipes.sort { $0.name < $1.name }
-        } else {
-            filteredRecipes.sort { $0.name > $1.name }
+    func setSortBy(_ newSort: String) {
+        sortBy = newSort
+        Task {
+            await loadInitialData()
         }
+    }
+
+    func selectTag(_ tag: String) {
+        selectedTag = tag
+        Task {
+            await loadRecipesByTag()
+        }
+    }
+
+    func loadRecipesByTag() async {
+        guard let tag = selectedTag else { return }
+        isLoading = true
+        errorMessage = nil
+        skip = 0
+        canLoadMore = false
+        do {
+            let order = isAscending ? "asc" : "desc"
+            let response = try await api.fetchRecipesByTag(tag, skip: skip, limit: limit, sortBy: sortBy, order: order)
+            recipes = response.recipes
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+
+    func loadRecipesByMeal(_ meal: String) async {
+        isLoading = true
+        errorMessage = nil
+        skip = 0
+        canLoadMore = false
+        do {
+            let order = isAscending ? "asc" : "desc"
+            let response = try await api.fetchRecipesByMeal(meal, skip: skip, limit: limit, sortBy: sortBy, order: order)
+            recipes = response.recipes
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
     }
 }
-
