@@ -9,9 +9,23 @@ import SwiftUI
 
 @main
 struct TastyRecipesApp: App {
+    
+    @State private var showSplash: Bool = true
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if showSplash {
+                SplashView()
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation {
+                                showSplash.toggle()
+                            }
+                        }
+                    }
+            } else {
+                ContentView()
+            }
         }
     }
 }

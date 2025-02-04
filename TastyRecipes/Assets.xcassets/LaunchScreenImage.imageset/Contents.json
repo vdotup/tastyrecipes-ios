@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "TastyRecipes_Icon_Launch_290x290.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "TastyRecipes_Icon_Launch_580x580.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "TastyRecipes_Icon_Launch_870x870.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
