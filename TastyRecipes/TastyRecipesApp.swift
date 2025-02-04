@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct TastyRecipesApp: App {
     
+    @AppStorage("first_launch") var firstLaunch = true
     @State private var showSplash: Bool = true
     
     var body: some Scene {
@@ -24,7 +25,11 @@ struct TastyRecipesApp: App {
                         }
                     }
             } else {
-                ContentView()
+                if firstLaunch {
+                    OnboardingView(firstLaunch: $firstLaunch)
+                } else {
+                    ContentView()
+                }
             }
         }
     }
