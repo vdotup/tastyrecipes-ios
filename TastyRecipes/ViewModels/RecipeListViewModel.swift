@@ -10,91 +10,84 @@ import SwiftUI
 @MainActor
 class RecipeListViewModel: ObservableObject {
     @Published var recipes: [Recipe] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    
+    @Published var filteredRecipes: [Recipe] = []
     @Published var searchQuery = ""
     @Published var sortAscending = true
-    
-    let api: RecipeAPIProtocol
-    
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+    private let api: RecipeAPIProtocol
     private var skip = 0
-    private let limit = 2
+    private let limit = 20
     private var canLoadMore = true
-    
+
     init(api: RecipeAPIProtocol = RecipeAPI()) {
         self.api = api
     }
-    
+
     func loadInitialRecipes() async {
         isLoading = true
         errorMessage = nil
         skip = 0
         canLoadMore = true
-        
         do {
             let response = try await api.fetchRecipes(skip: skip, limit: limit)
-            self.recipes = response.recipes
+            recipes = response.recipes
+            filteredRecipes = response.recipes
             skip += limit
-            canLoadMore = (response.recipes.count == limit)
+            canLoadMore = response.recipes.count == limit
             sortIfNeeded()
         } catch {
             errorMessage = error.localizedDescription
         }
         isLoading = false
     }
-    
+
     func loadMoreRecipesIfNeeded(currentRecipe: Recipe) async {
-        guard canLoadMore,
-              let index = recipes.firstIndex(where: { $0.id == currentRecipe.id }),
-              index > recipes.count - 5,
-              !isLoading else {
-            return
+        guard canLoadMore else { return }
+        guard let index = filteredRecipes.firstIndex(where: { $0.id == currentRecipe.id }) else { return }
+        if index > filteredRecipes.count - 5 && !isLoading {
+            isLoading = true
+            do {
+                let response = try await api.fetchRecipes(skip: skip, limit: limit)
+                recipes.append(contentsOf: response.recipes)
+                skip += limit
+                canLoadMore = response.recipes.count == limit
+                filterAndSortRecipes()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
-        
-        isLoading = true
-        
-        do {
-            let response = try await api.fetchRecipes(skip: skip, limit: limit)
-            self.recipes.append(contentsOf: response.recipes)
-            skip += limit
-            canLoadMore = (response.recipes.count == limit)
-            sortIfNeeded()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-        isLoading = false
     }
-    
+
     func refresh() async {
         await loadInitialRecipes()
     }
-    
+
     func search() async {
-        guard !searchQuery.isEmpty else {
-            await loadInitialRecipes()
-            return
-        }
-        
-        isLoading = true
-        errorMessage = nil
-        
-        do {
-            let results = try await api.searchRecipes(query: searchQuery)
-            self.recipes = results
-            sortIfNeeded()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-        isLoading = false
+        filterAndSortRecipes()
     }
-    
+
     func toggleSort() {
         sortAscending.toggle()
+        filterAndSortRecipes()
+    }
+
+    private func filterAndSortRecipes() {
+        if searchQuery.isEmpty {
+            filteredRecipes = recipes
+        } else {
+            filteredRecipes = recipes.filter { $0.name.localizedCaseInsensitiveContains(searchQuery) }
+        }
         sortIfNeeded()
     }
-    
-    private func sortIfNeeded() {
-        recipes.sort { sortAscending ? $0.name < $1.name : $0.name > $1.name }
+
+    func sortIfNeeded() {
+        if sortAscending {
+            filteredRecipes.sort { $0.name < $1.name }
+        } else {
+            filteredRecipes.sort { $0.name > $1.name }
+        }
     }
 }
+

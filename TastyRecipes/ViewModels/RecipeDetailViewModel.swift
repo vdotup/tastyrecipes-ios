@@ -9,9 +9,17 @@ import SwiftUI
 
 @MainActor
 class RecipeDetailViewModel: ObservableObject {
-    let recipe: Recipe
-    
+    @Published var recipe: Recipe
+    @Published var isLoading = false
+
     init(recipe: Recipe) {
         self.recipe = recipe
     }
+
+    func loadRecipeDetails() async {
+        isLoading = true
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        isLoading = false
+    }
 }
+

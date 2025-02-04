@@ -9,62 +9,116 @@ import SwiftUI
 
 struct RecipeDetailView: View {
     @ObservedObject var viewModel: RecipeDetailViewModel
+    @State private var fadeIn: Bool = false
+    
+    // We assume we might have a state or property in the view model telling us if the data is loaded.
+    // For demonstration, let's say we use the same 'fadeIn' or we might pass `viewModel.isLoading`.
+    var isDataLoading: Bool {
+        // If you have an 'isLoading' in the detail VM, use that:
+        // return viewModel.isLoading
+        // For this demonstration, we'll just use !fadeIn as a proxy
+        return !fadeIn
+    }
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                AsyncImage(url: URL(string: viewModel.recipe.image)) { image in
-                    image.resizable().scaledToFit()
-                } placeholder: {
-                    ProgressView()
+                if let url = URL(string: viewModel.recipe.image) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                                .frame(height: 200)
+                                .frame(maxWidth: .infinity)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .transition(.opacity)
+                                .onAppear {
+                                    fadeIn = true
+                                }
+                        case .failure(_):
+                            Image(systemName: "photo")
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundColor(.gray)
+                                .frame(height: 200)
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
                 }
                 
                 Text(viewModel.recipe.name)
                     .font(.title)
-                    .padding(.bottom, 4)
+                    .bold()
+                
+                HStack(spacing: 4) {
+                    ForEach(1...5, id: \.self) { index in
+                        Image(systemName: starImageName(for: Double(index)))
+                            .foregroundColor(.yellow)
+                    }
+                    Text("(\(String(format: "%.1f", viewModel.recipe.rating)))")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(viewModel.recipe.reviewCount) reviews")
+                        .font(.subheadline)
+                }
+                .font(.subheadline)
                 
                 HStack {
                     Text("Difficulty: \(viewModel.recipe.difficulty)")
                     Spacer()
-                    Text("Rating: \(String(format: "%.1f", viewModel.recipe.rating)) (\(viewModel.recipe.reviewCount) reviews)")
+                    Text("Cuisine: \(viewModel.recipe.cuisine)")
                 }
-                .font(.subheadline)
                 
-                Text("Cuisine: \(viewModel.recipe.cuisine)")
-                    .font(.subheadline)
+                Group {
+                    Text("Servings: \(viewModel.recipe.servings)")
+                    Text("Prep Time: \(viewModel.recipe.prepTimeMinutes) minutes")
+                    Text("Cook Time: \(viewModel.recipe.cookTimeMinutes) minutes")
+                    Text("Calories/Serving: \(viewModel.recipe.caloriesPerServing)")
+                    Text("Meal Types: \(viewModel.recipe.mealType.joined(separator: ", "))")
+                    Text("Tags: \(viewModel.recipe.tags.joined(separator: ", "))")
+                }
                 
-                Text("Meal Type: \(viewModel.recipe.mealType.joined(separator: ", "))")
-                    .font(.subheadline)
+                Divider()
                 
-                Text("Servings: \(viewModel.recipe.servings)")
-                    .font(.subheadline)
-                
-                Text("Prep Time: \(viewModel.recipe.prepTimeMinutes) minutes")
-                    .font(.subheadline)
-                
-                Text("Cook Time: \(viewModel.recipe.cookTimeMinutes) minutes")
-                    .font(.subheadline)
-                
-                Text("Calories/Serving: \(viewModel.recipe.caloriesPerServing)")
-                    .font(.subheadline)
-                
-                Text("Tags: \(viewModel.recipe.tags.joined(separator: ", "))")
-                    .font(.subheadline)
-                
-                Text("Ingredients:")
+                Text("Ingredients")
                     .font(.headline)
                 Text(viewModel.recipe.ingredients.joined(separator: ", "))
                 
-                Text("Instructions:")
+                Divider()
+                
+                Text("Instructions")
                     .font(.headline)
                 ForEach(viewModel.recipe.instructions, id: \.self) { step in
                     Text("• \(step)")
                 }
             }
             .padding()
+            // If data is loading, apply placeholder redaction
+            .redacted(reason: isDataLoading ? .placeholder : [])
         }
         .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                // mimic load done
+                fadeIn = true
+            }
+        }
+    }
+    
+    private func starImageName(for starIndex: Double) -> String {
+        let rating = viewModel.recipe.rating
+        if rating >= starIndex {
+            return "star.fill"
+        } else if rating + 0.5 >= starIndex {
+            return "star.leadinghalf.filled"
+        } else {
+            return "star"
+        }
     }
 }
 
