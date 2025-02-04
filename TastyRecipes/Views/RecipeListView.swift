@@ -15,60 +15,40 @@ struct RecipeListView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack {
-                HStack {
-                    TextField("Search recipes...", text: $viewModel.searchQuery)
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit {
+            NavigationView {
+                ZStack {
+                    if viewModel.isLoading && viewModel.recipes.isEmpty {
+                        ProgressView("Loading recipes...")
+                    } else {
+                        List(viewModel.recipes, id: \.id) { recipe in
+                            NavigationLink(
+                                destination: RecipeDetailView(
+                                    viewModel: RecipeDetailViewModel(recipe: recipe)
+                                )
+                            ) {
+                                Text(recipe.name)
+                                    .onAppear {
+                                        Task {
+                                            await viewModel.loadMoreRecipesIfNeeded(currentRecipe: recipe)
+                                        }
+                                    }
+                            }
+                        }
+                        .listStyle(.plain)
+                        .searchable(text: $viewModel.searchQuery, placement: .automatic)
+                        .onSubmit(of: .search) {
                             Task {
                                 await viewModel.search()
                             }
                         }
-                    
-                    Button {
-                        Task {
-                            await viewModel.search()
-                        }
-                    } label: {
-                        Image(systemName: "magnifyingglass")
                     }
                 }
-                .padding(.horizontal)
-                
-                Button {
-                    withAnimation {
-                        viewModel.toggleSort()
-                    }
-                } label: {
-                    Text(viewModel.sortAscending ? "Sort Desc" : "Sort Asc")
+                .navigationTitle("Recipes")
+                .task {
+                    await viewModel.loadInitialRecipes()
                 }
-                .padding(.bottom, 4)
-                
-                List(viewModel.recipes, id: \.id) { recipe in
-                    NavigationLink {
-                        RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))
-                    } label: {
-                        Text(recipe.name)
-                            .onAppear {
-                                Task {
-                                    await viewModel.loadMoreRecipesIfNeeded(currentRecipe: recipe)
-                                }
-                            }
-                    }
-                }
-                .refreshable {
-                    await viewModel.refresh()
-                }
-                .listStyle(.plain)
-                .animation(.default, value: viewModel.recipes)
             }
-            .navigationTitle("Recipes")
         }
-        .task {
-            await viewModel.loadInitialRecipes()
-        }
-    }
 }
 
 #Preview {
