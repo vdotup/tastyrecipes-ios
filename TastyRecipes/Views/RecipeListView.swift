@@ -44,6 +44,18 @@ struct RecipeListView: View {
                     }
                 }
                 .navigationTitle("Recipes")
+                .toolbar {
+                    ToolbarItem(placement: .automatic) {
+                        Button {
+                            withAnimation {
+                                viewModel.toggleSort()
+                            }
+                        } label: {
+                            Image(systemName: viewModel.sortAscending ? "arrow.up" : "arrow.down")
+                        }
+
+                    }
+                }
                 .task {
                     await viewModel.loadInitialRecipes()
                 }
