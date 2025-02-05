@@ -15,21 +15,25 @@ class RecipeListViewModel: ObservableObject {
     @Published var quickMeals: [Recipe] = []
     @Published var mealTypes: [String] = []
     @Published var selectedMealType: String?
+    
     @Published var recipes: [Recipe] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isAscending = true
     @Published var sortBy = "name"
-
-    private let api: RecipeAPIProtocol
+    
+    let api: RecipeAPIProtocol
+    
     private var skip = 0
-    private let limit = 20
+    private let limit = 50
     private var canLoadMore = true
-
+    
+    let sortFields = ["name", "rating", "cookTimeMinutes", "caloriesPerServing", "reviewCount"]
+    
     init(api: RecipeAPIProtocol = RecipeAPI()) {
         self.api = api
     }
-
+    
     func loadHomeData() async {
         isLoading = true
         errorMessage = nil
@@ -38,21 +42,29 @@ class RecipeListViewModel: ObservableObject {
         do {
             let ratingDesc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "rating", order: "desc")
             highestRated = ratingDesc.recipes
+            
             let reviewDesc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "reviewCount", order: "desc")
             mostPopular = reviewDesc.recipes
+            
             let calAsc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "caloriesPerServing", order: "asc")
             lowCalories = calAsc.recipes
+            
             let cookAsc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "cookTimeMinutes", order: "asc")
             quickMeals = cookAsc.recipes
-            mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack", "Brunch"]
-            selectedMealType = nil
-            try await loadBaseList()
+            
+            mealTypes = ["All", "Breakfast", "Lunch", "Dinner", "Snack", "Brunch"]
+            if selectedMealType == nil {
+                selectedMealType = "All"
+            }
+            
+            await loadBaseList()
+            
         } catch {
             errorMessage = error.localizedDescription
         }
         isLoading = false
     }
-
+    
     func loadBaseList() async {
         isLoading = true
         errorMessage = nil
@@ -69,7 +81,7 @@ class RecipeListViewModel: ObservableObject {
         }
         isLoading = false
     }
-
+    
     func loadMoreRecipesIfNeeded(current: Recipe) async {
         guard canLoadMore, !isLoading else { return }
         guard let index = recipes.firstIndex(where: { $0.id == current.id }) else { return }
@@ -87,30 +99,43 @@ class RecipeListViewModel: ObservableObject {
             isLoading = false
         }
     }
-
+    
     func setAscending(_ value: Bool) {
-        isAscending = value
+        withAnimation {
+            isAscending = value
+        }
+        
         Task {
             await reloadByMealTypeIfNeeded()
         }
     }
-
+    
     func setSortBy(_ newSort: String) {
-        sortBy = newSort
+        withAnimation {
+            sortBy = newSort
+        }
         Task {
             await reloadByMealTypeIfNeeded()
         }
     }
-
+    
     func selectMealType(_ meal: String) {
-        selectedMealType = meal
+        withAnimation {
+            selectedMealType = meal
+        }
         Task {
             await loadMealType()
         }
     }
-
+    
     func loadMealType() async {
         guard let meal = selectedMealType else { return }
+        
+        if meal == "All" {
+            await loadBaseList()
+            return
+        }
+        
         isLoading = true
         skip = 0
         canLoadMore = false
@@ -123,17 +148,17 @@ class RecipeListViewModel: ObservableObject {
         }
         isLoading = false
     }
-
+    
     func reloadByMealTypeIfNeeded() async {
-        if let _ = selectedMealType {
+        if let meal = selectedMealType, meal != "All" {
             await loadMealType()
         } else {
             await loadBaseList()
         }
     }
-
+    
     func refresh() async {
-        if let _ = selectedMealType {
+        if let meal = selectedMealType, meal != "All" {
             await loadMealType()
         } else {
             await loadBaseList()

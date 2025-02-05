@@ -62,7 +62,7 @@ final class ImageLoader: ObservableObject {
                 image = uiImg
             }
         } catch {
-            // Handle error as needed
+            // Handle error
         }
     }
 }

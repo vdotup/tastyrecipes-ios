@@ -31,6 +31,7 @@ struct LoadingPlaceholderList: View {
                 .redacted(reason: .placeholder)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
 }

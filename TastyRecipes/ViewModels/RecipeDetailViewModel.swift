@@ -11,12 +11,8 @@ import SwiftUI
 class RecipeDetailViewModel: ObservableObject {
     @Published var recipe: Recipe
     @Published var isLoading = false
-
+    
     init(recipe: Recipe) {
         self.recipe = recipe
-    }
-
-    func loadRecipeDetails() async {
-        isLoading = false
     }
 }
