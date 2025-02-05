@@ -14,14 +14,12 @@ struct RecipeDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 HeaderSection(recipe: viewModel.recipe)
-                
                 QuickInfoGrid(recipe: viewModel.recipe)
-                
                 TagsSection(recipe: viewModel.recipe)
-                
                 IngredientsSection(ingredients: viewModel.recipe.ingredients)
-                
+                    .accessibilityIdentifier("IngredientsSection")
                 InstructionsSection(instructions: viewModel.recipe.instructions)
+                    .accessibilityIdentifier("InstructionsSection")
             }
             .padding()
         }
@@ -43,6 +41,7 @@ struct HeaderSection: View {
                 .frame(height: 200)
                 .cornerRadius(12)
                 .shadow(radius: 4)
+                .accessibilityIdentifier("RecipeHeaderImage")
             
             HStack {
                 RatingView(rating: recipe.rating, reviewCount: recipe.reviewCount)
@@ -174,6 +173,7 @@ struct InstructionsSection: View {
         }
     }
 }
+
 
 #Preview {
     RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: .sample1))

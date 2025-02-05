@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
+		9B3369AF2D539B6A00E9CADF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B3368CF2D511A3100E9CADF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B3368D62D511A3100E9CADF;
+			remoteInfo = TastyRecipes;
+		};
 		E58282E02D5387F100A97B68 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9B3368CF2D511A3100E9CADF /* Project object */;
@@ -18,6 +25,7 @@
 
 /* Begin PBXFileReference section */
 		9B3368D72D511A3100E9CADF /* TastyRecipes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TastyRecipes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B3369AB2D539B6A00E9CADF /* TastyRecipesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TastyRecipesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E58282DA2D5387F100A97B68 /* TastyRecipesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TastyRecipesUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -40,6 +48,11 @@
 			path = TastyRecipes;
 			sourceTree = "<group>";
 		};
+		9B3369AC2D539B6A00E9CADF /* TastyRecipesTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TastyRecipesTests;
+			sourceTree = "<group>";
+		};
 		E58282DB2D5387F100A97B68 /* TastyRecipesUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TastyRecipesUITests;
@@ -49,6 +62,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		9B3368D42D511A3100E9CADF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B3369A82D539B6A00E9CADF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -70,6 +90,7 @@
 			children = (
 				9B3368D92D511A3100E9CADF /* TastyRecipes */,
 				E58282DB2D5387F100A97B68 /* TastyRecipesUITests */,
+				9B3369AC2D539B6A00E9CADF /* TastyRecipesTests */,
 				9B3368D82D511A3100E9CADF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -79,6 +100,7 @@
 			children = (
 				9B3368D72D511A3100E9CADF /* TastyRecipes.app */,
 				E58282DA2D5387F100A97B68 /* TastyRecipesUITests.xctest */,
+				9B3369AB2D539B6A00E9CADF /* TastyRecipesTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,6 +129,29 @@
 			productName = TastyRecipes;
 			productReference = 9B3368D72D511A3100E9CADF /* TastyRecipes.app */;
 			productType = "com.apple.product-type.application";
+		};
+		9B3369AA2D539B6A00E9CADF /* TastyRecipesTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B3369B32D539B6A00E9CADF /* Build configuration list for PBXNativeTarget "TastyRecipesTests" */;
+			buildPhases = (
+				9B3369A72D539B6A00E9CADF /* Sources */,
+				9B3369A82D539B6A00E9CADF /* Frameworks */,
+				9B3369A92D539B6A00E9CADF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9B3369B02D539B6A00E9CADF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9B3369AC2D539B6A00E9CADF /* TastyRecipesTests */,
+			);
+			name = TastyRecipesTests;
+			packageProductDependencies = (
+			);
+			productName = TastyRecipesTests;
+			productReference = 9B3369AB2D539B6A00E9CADF /* TastyRecipesTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		E58282D92D5387F100A97B68 /* TastyRecipesUITests */ = {
 			isa = PBXNativeTarget;
@@ -144,6 +189,10 @@
 					9B3368D62D511A3100E9CADF = {
 						CreatedOnToolsVersion = 16.2;
 					};
+					9B3369AA2D539B6A00E9CADF = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 9B3368D62D511A3100E9CADF;
+					};
 					E58282D92D5387F100A97B68 = {
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = 9B3368D62D511A3100E9CADF;
@@ -166,12 +215,20 @@
 			targets = (
 				9B3368D62D511A3100E9CADF /* TastyRecipes */,
 				E58282D92D5387F100A97B68 /* TastyRecipesUITests */,
+				9B3369AA2D539B6A00E9CADF /* TastyRecipesTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9B3368D52D511A3100E9CADF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B3369A92D539B6A00E9CADF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -195,6 +252,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9B3369A72D539B6A00E9CADF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E58282D62D5387F100A97B68 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -205,6 +269,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		9B3369B02D539B6A00E9CADF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B3368D62D511A3100E9CADF /* TastyRecipes */;
+			targetProxy = 9B3369AF2D539B6A00E9CADF /* PBXContainerItemProxy */;
+		};
 		E58282E12D5387F100A97B68 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 9B3368D62D511A3100E9CADF /* TastyRecipes */;
@@ -409,6 +478,47 @@
 			};
 			name = Release;
 		};
+		9B3369B12D539B6A00E9CADF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M9AP67F2SC;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vdotup.TastyRecipesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TastyRecipes.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TastyRecipes";
+			};
+			name = Debug;
+		};
+		9B3369B22D539B6A00E9CADF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M9AP67F2SC;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vdotup.TastyRecipesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TastyRecipes.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TastyRecipes";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		E58282E32D5387F100A97B68 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -465,6 +575,15 @@
 			buildConfigurations = (
 				9B3368E72D511A3500E9CADF /* Debug */,
 				9B3368E82D511A3500E9CADF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B3369B32D539B6A00E9CADF /* Build configuration list for PBXNativeTarget "TastyRecipesTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B3369B12D539B6A00E9CADF /* Debug */,
+				9B3369B22D539B6A00E9CADF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

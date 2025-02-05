@@ -23,13 +23,11 @@ struct MockRecipeAPI: RecipeAPIProtocol {
     }
 
     func fetchRecipesByTag(_ tag: String, skip: Int, limit: Int, sortBy: String?, order: String?) async throws -> RecipeResponse {
-        // Return random sample or empty
         let filtered = [Recipe.sample1, Recipe.sample2, Recipe.sample3, Recipe.sample4].filter { $0.tags.contains(tag) }
         return RecipeResponse(recipes: filtered, total: filtered.count, skip: skip, limit: limit)
     }
 
     func fetchRecipesByMeal(_ meal: String, skip: Int, limit: Int, sortBy: String?, order: String?) async throws -> RecipeResponse {
-        // Return random sample or empty
         let filtered = [Recipe.sample1, Recipe.sample2, Recipe.sample3, Recipe.sample4].filter { $0.mealType.contains(meal) }
         return RecipeResponse(recipes: filtered, total: filtered.count, skip: skip, limit: limit)
     }

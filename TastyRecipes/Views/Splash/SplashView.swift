@@ -25,7 +25,7 @@ struct SplashView: View {
                     withAnimation(.easeIn(duration: 1.0)) {
                         scale = 1.2
                     }
-
+                    
                 }
         }
     }

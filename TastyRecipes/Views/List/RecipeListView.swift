@@ -20,30 +20,39 @@ struct RecipeListView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    
-                    // Horizontal highlight sections
                     if !viewModel.highestRated.isEmpty {
-                        HorizontalRecipeScroll(title: "Highest Rated",
-                                               recipes: viewModel.highestRated,
-                                               subtitleKey: "rating")
+                        HorizontalRecipeScroll(
+                            title: "Highest Rated",
+                            recipes: viewModel.highestRated,
+                            subtitleKey: "rating"
+                        )
                         .animation(.easeInOut, value: viewModel.highestRated)
                     }
+                    
                     if !viewModel.mostPopular.isEmpty {
-                        HorizontalRecipeScroll(title: "Most Popular",
-                                               recipes: viewModel.mostPopular,
-                                               subtitleKey: "reviewCount")
+                        HorizontalRecipeScroll(
+                            title: "Most Popular",
+                            recipes: viewModel.mostPopular,
+                            subtitleKey: "reviewCount"
+                        )
                         .animation(.easeInOut, value: viewModel.mostPopular)
                     }
+                    
                     if !viewModel.lowCalories.isEmpty {
-                        HorizontalRecipeScroll(title: "Low Calories",
-                                               recipes: viewModel.lowCalories,
-                                               subtitleKey: "caloriesPerServing")
+                        HorizontalRecipeScroll(
+                            title: "Low Calories",
+                            recipes: viewModel.lowCalories,
+                            subtitleKey: "caloriesPerServing"
+                        )
                         .animation(.easeInOut, value: viewModel.lowCalories)
                     }
+                    
                     if !viewModel.quickMeals.isEmpty {
-                        HorizontalRecipeScroll(title: "Quick Meals",
-                                               recipes: viewModel.quickMeals,
-                                               subtitleKey: "cookTimeMinutes")
+                        HorizontalRecipeScroll(
+                            title: "Quick Meals",
+                            recipes: viewModel.quickMeals,
+                            subtitleKey: "cookTimeMinutes"
+                        )
                         .animation(.easeInOut, value: viewModel.quickMeals)
                     }
                     
@@ -61,8 +70,10 @@ struct RecipeListView: View {
                                 }
                             }
                         } label: {
-                            Label(viewModel.selectedMealType ?? "All Meals",
-                                  systemImage: "fork.knife")
+                            Label(
+                                viewModel.selectedMealType ?? "All Meals",
+                                systemImage: "fork.knife"
+                            )
                             .font(.callout)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -107,6 +118,7 @@ struct RecipeListView: View {
                                     viewModel: RecipeDetailViewModel(recipe: recipe))
                                 ) {
                                     RecipeListItemView(recipe: recipe)
+                                        .accessibilityIdentifier("RecipeRow_\(recipe.id)")
                                         .onAppear {
                                             Task {
                                                 await viewModel.loadMoreRecipesIfNeeded(current: recipe)
@@ -118,6 +130,7 @@ struct RecipeListView: View {
                         }
                         .animation(.easeInOut, value: viewModel.recipes)
                         .redacted(reason: viewModel.isLoading ? .placeholder : [])
+                        .accessibilityIdentifier("RecipeList")
                     }
                 }
             }
@@ -146,8 +159,7 @@ struct RecipeListView: View {
     }
     
     var viewModelIsUsingMock: Bool {
-        return (viewModel as Any) is RecipeListViewModel &&
-        type(of: viewModel.api) == MockRecipeAPI.self
+        return (viewModel as Any) is RecipeListViewModel && type(of: viewModel.api) == MockRecipeAPI.self
     }
 }
 
