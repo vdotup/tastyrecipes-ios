@@ -24,4 +24,23 @@ struct Recipe: Identifiable, Codable, Equatable {
     let rating: Double
     let reviewCount: Int
     let mealType: [String]
+    
+    static let sample = Recipe(
+        id: 10,
+        name: "Preview Dish",
+        ingredients: ["Salt", "Pepper"],
+        instructions: ["Season the dish", "Serve hot"],
+        prepTimeMinutes: 10,
+        cookTimeMinutes: 25,
+        servings: 2,
+        difficulty: "Medium",
+        cuisine: "Various",
+        caloriesPerServing: 180,
+        tags: ["Spicy"],
+        userId: 1,
+        image: "",
+        rating: 4.5,
+        reviewCount: 12,
+        mealType: ["Dinner"]
+    )
 }

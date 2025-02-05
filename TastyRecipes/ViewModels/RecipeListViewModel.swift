@@ -9,18 +9,19 @@ import SwiftUI
 
 @MainActor
 class RecipeListViewModel: ObservableObject {
+    @Published var highestRated: [Recipe] = []
+    @Published var mostPopular: [Recipe] = []
+    @Published var lowCalories: [Recipe] = []
+    @Published var quickMeals: [Recipe] = []
+    @Published var mealTypes: [String] = []
+    @Published var selectedMealType: String?
     @Published var recipes: [Recipe] = []
-    @Published var topRated: [Recipe] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var isAscending = true
     @Published var sortBy = "name"
-    @Published var tags: [String] = []
-    @Published var selectedTag: String?
-    @Published var meals: [String] = []
-    
-    let api: RecipeAPIProtocol
-    
+
+    private let api: RecipeAPIProtocol
     private var skip = 0
     private let limit = 20
     private var canLoadMore = true
@@ -29,7 +30,30 @@ class RecipeListViewModel: ObservableObject {
         self.api = api
     }
 
-    func loadInitialData() async {
+    func loadHomeData() async {
+        isLoading = true
+        errorMessage = nil
+        skip = 0
+        canLoadMore = true
+        do {
+            let ratingDesc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "rating", order: "desc")
+            highestRated = ratingDesc.recipes
+            let reviewDesc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "reviewCount", order: "desc")
+            mostPopular = reviewDesc.recipes
+            let calAsc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "caloriesPerServing", order: "asc")
+            lowCalories = calAsc.recipes
+            let cookAsc = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "cookTimeMinutes", order: "asc")
+            quickMeals = cookAsc.recipes
+            mealTypes = ["Breakfast", "Lunch", "Dinner", "Snack", "Brunch"]
+            selectedMealType = nil
+            try await loadBaseList()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+
+    func loadBaseList() async {
         isLoading = true
         errorMessage = nil
         skip = 0
@@ -40,22 +64,19 @@ class RecipeListViewModel: ObservableObject {
             recipes = response.recipes
             skip += limit
             canLoadMore = response.recipes.count == limit
-            topRated = try await api.fetchRecipes(skip: 0, limit: 10, sortBy: "rating", order: "desc").recipes
-            tags = try await api.fetchTags()
-            meals = ["Breakfast", "Lunch", "Dinner"]
         } catch {
             errorMessage = error.localizedDescription
         }
         isLoading = false
     }
 
-    func loadMoreRecipesIfNeeded(currentRecipe: Recipe) async {
+    func loadMoreRecipesIfNeeded(current: Recipe) async {
         guard canLoadMore, !isLoading else { return }
-        guard let index = recipes.firstIndex(where: { $0.id == currentRecipe.id }) else { return }
+        guard let index = recipes.firstIndex(where: { $0.id == current.id }) else { return }
         if index > recipes.count - 5 {
             isLoading = true
+            let order = isAscending ? "asc" : "desc"
             do {
-                let order = isAscending ? "asc" : "desc"
                 let response = try await api.fetchRecipes(skip: skip, limit: limit, sortBy: sortBy, order: order)
                 recipes.append(contentsOf: response.recipes)
                 skip += limit
@@ -67,40 +88,35 @@ class RecipeListViewModel: ObservableObject {
         }
     }
 
-    func refresh() async {
-        await loadInitialData()
-    }
-
     func setAscending(_ value: Bool) {
         isAscending = value
         Task {
-            await loadInitialData()
+            await reloadByMealTypeIfNeeded()
         }
     }
 
     func setSortBy(_ newSort: String) {
         sortBy = newSort
         Task {
-            await loadInitialData()
+            await reloadByMealTypeIfNeeded()
         }
     }
 
-    func selectTag(_ tag: String) {
-        selectedTag = tag
+    func selectMealType(_ meal: String) {
+        selectedMealType = meal
         Task {
-            await loadRecipesByTag()
+            await loadMealType()
         }
     }
 
-    func loadRecipesByTag() async {
-        guard let tag = selectedTag else { return }
+    func loadMealType() async {
+        guard let meal = selectedMealType else { return }
         isLoading = true
-        errorMessage = nil
         skip = 0
         canLoadMore = false
+        let order = isAscending ? "asc" : "desc"
         do {
-            let order = isAscending ? "asc" : "desc"
-            let response = try await api.fetchRecipesByTag(tag, skip: skip, limit: limit, sortBy: sortBy, order: order)
+            let response = try await api.fetchRecipesByMeal(meal, skip: 0, limit: limit, sortBy: sortBy, order: order)
             recipes = response.recipes
         } catch {
             errorMessage = error.localizedDescription
@@ -108,18 +124,19 @@ class RecipeListViewModel: ObservableObject {
         isLoading = false
     }
 
-    func loadRecipesByMeal(_ meal: String) async {
-        isLoading = true
-        errorMessage = nil
-        skip = 0
-        canLoadMore = false
-        do {
-            let order = isAscending ? "asc" : "desc"
-            let response = try await api.fetchRecipesByMeal(meal, skip: skip, limit: limit, sortBy: sortBy, order: order)
-            recipes = response.recipes
-        } catch {
-            errorMessage = error.localizedDescription
+    func reloadByMealTypeIfNeeded() async {
+        if let _ = selectedMealType {
+            await loadMealType()
+        } else {
+            await loadBaseList()
         }
-        isLoading = false
+    }
+
+    func refresh() async {
+        if let _ = selectedMealType {
+            await loadMealType()
+        } else {
+            await loadBaseList()
+        }
     }
 }

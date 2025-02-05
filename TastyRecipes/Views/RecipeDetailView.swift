@@ -9,35 +9,32 @@ import SwiftUI
 
 struct RecipeDetailView: View {
     @ObservedObject var viewModel: RecipeDetailViewModel
-    @State private var fadeIn: Bool = false
+    @State private var fadeIn = false
+    @State private var selectedTag: String?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if let url = URL(string: viewModel.recipe.image) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                                .frame(height: 200)
-                                .frame(maxWidth: .infinity)
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .transition(.opacity)
-                                .onAppear {
-                                    fadeIn = true
-                                }
-                        case .failure(_):
-                            Image(systemName: "photo")
-                                .resizable()
-                                .scaledToFit()
-                                .foregroundColor(.gray)
-                                .frame(height: 200)
-                        @unknown default:
-                            EmptyView()
-                        }
+                AsyncImage(url: URL(string: viewModel.recipe.image)) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(height: 200)
+                            .frame(maxWidth: .infinity)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .transition(.opacity)
+                            .onAppear { fadeIn = true }
+                    case .failure(_):
+                        Image(systemName: "photo")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.gray)
+                            .frame(height: 200)
+                    @unknown default:
+                        EmptyView()
                     }
                 }
                 Text(viewModel.recipe.name)
@@ -45,7 +42,7 @@ struct RecipeDetailView: View {
                     .bold()
                 HStack(spacing: 4) {
                     ForEach(1...5, id: \.self) { index in
-                        Image(systemName: starImageName(for: Double(index)))
+                        Image(systemName: starImageName(Double(index)))
                             .foregroundColor(.yellow)
                     }
                     Text("(\(String(format: "%.1f", viewModel.recipe.rating)))")
@@ -65,13 +62,24 @@ struct RecipeDetailView: View {
                     Text("Cook Time: \(viewModel.recipe.cookTimeMinutes) minutes")
                     Text("Calories/Serving: \(viewModel.recipe.caloriesPerServing)")
                     Text("Meal Types: \(viewModel.recipe.mealType.joined(separator: ", "))")
-                    Text("Tags: \(viewModel.recipe.tags.joined(separator: ", "))")
                 }
-                Divider()
+                Text("Tags")
+                    .font(.headline)
+                FlowLayout(viewModel.recipe.tags, id: \.self) { tag in
+                    Button {
+                        selectedTag = tag
+                    } label: {
+                        Text(tag)
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue.opacity(0.2))
+                            .cornerRadius(8)
+                    }
+                }
                 Text("Ingredients")
                     .font(.headline)
                 Text(viewModel.recipe.ingredients.joined(separator: ", "))
-                Divider()
                 Text("Instructions")
                     .font(.headline)
                 ForEach(viewModel.recipe.instructions, id: \.self) { step in
@@ -83,6 +91,9 @@ struct RecipeDetailView: View {
         }
         .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $selectedTag) { tag in
+            TagResultsView(api: RecipeAPI(), tag: tag)
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 fadeIn = true
@@ -90,32 +101,14 @@ struct RecipeDetailView: View {
         }
     }
 
-    func starImageName(for starIndex: Double) -> String {
-        let rating = viewModel.recipe.rating
-        if rating >= starIndex { return "star.fill" }
-        else if rating + 0.5 >= starIndex { return "star.leadinghalf.filled" }
+    func starImageName(_ index: Double) -> String {
+        let r = viewModel.recipe.rating
+        if r >= index { return "star.fill" }
+        else if r + 0.5 >= index { return "star.leadinghalf.filled" }
         else { return "star" }
     }
 }
 
 #Preview {
-    let sampleRecipe = Recipe(
-        id: 10,
-        name: "Preview Dish",
-        ingredients: ["Salt", "Pepper"],
-        instructions: ["Season the dish", "Serve hot"],
-        prepTimeMinutes: 10,
-        cookTimeMinutes: 25,
-        servings: 2,
-        difficulty: "Medium",
-        cuisine: "Various",
-        caloriesPerServing: 180,
-        tags: ["Spicy"],
-        userId: 1,
-        image: "",
-        rating: 4.5,
-        reviewCount: 12,
-        mealType: ["Dinner"]
-    )
-    RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: sampleRecipe))
+    RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: .sample))
 }

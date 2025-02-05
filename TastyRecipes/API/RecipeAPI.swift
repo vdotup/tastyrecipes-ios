@@ -17,7 +17,7 @@ struct RecipeAPI: RecipeAPIProtocol {
             URLQueryItem(name: "limit", value: "\(limit)")
         ]
         if let sortBy = sortBy {
-            queryItems.append(URLQueryItem(name: "sort", value: sortBy))
+            queryItems.append(URLQueryItem(name: "sortBy", value: sortBy))
         }
         if let order = order {
             queryItems.append(URLQueryItem(name: "order", value: order))
@@ -38,7 +38,7 @@ struct RecipeAPI: RecipeAPIProtocol {
             URLQueryItem(name: "limit", value: "\(limit)")
         ]
         if let sortBy = sortBy {
-            queryItems.append(URLQueryItem(name: "sort", value: sortBy))
+            queryItems.append(URLQueryItem(name: "sortBy", value: sortBy))
         }
         if let order = order {
             queryItems.append(URLQueryItem(name: "order", value: order))
@@ -52,10 +52,12 @@ struct RecipeAPI: RecipeAPIProtocol {
     }
 
     func fetchTags() async throws -> [String] {
-        // DummyJSON doesn't provide a direct "fetch all tags" endpoint.
-        // We'll simulate an endpoint here. In a real scenario, you'd adjust as needed.
-        // Example with /recipes/tags or something custom. We'll mock returning some tags.
-        return ["Vegan", "Quick", "Italian", "Dessert", "Healthy"]
+        let url = URL(string: "\(baseURL)/recipes/tags")!
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode([String].self, from: data)
     }
 
     func fetchRecipesByTag(_ tag: String, skip: Int, limit: Int, sortBy: String?, order: String?) async throws -> RecipeResponse {
@@ -66,7 +68,7 @@ struct RecipeAPI: RecipeAPIProtocol {
             URLQueryItem(name: "tag", value: tag)
         ]
         if let sortBy = sortBy {
-            queryItems.append(URLQueryItem(name: "sort", value: sortBy))
+            queryItems.append(URLQueryItem(name: "sortBy", value: sortBy))
         }
         if let order = order {
             queryItems.append(URLQueryItem(name: "order", value: order))
@@ -87,7 +89,7 @@ struct RecipeAPI: RecipeAPIProtocol {
             URLQueryItem(name: "meal", value: meal)
         ]
         if let sortBy = sortBy {
-            queryItems.append(URLQueryItem(name: "sort", value: sortBy))
+            queryItems.append(URLQueryItem(name: "sortBy", value: sortBy))
         }
         if let order = order {
             queryItems.append(URLQueryItem(name: "order", value: order))
