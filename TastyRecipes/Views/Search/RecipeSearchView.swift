@@ -26,6 +26,7 @@ struct RecipeSearchView: View {
         }
         .navigationTitle("Search")
         .searchable(text: $query)
+        .accessibilityIdentifier("RecipeSearchBar")
         .onSubmit(of: .search) {
             Task { await performSearch() }
         }

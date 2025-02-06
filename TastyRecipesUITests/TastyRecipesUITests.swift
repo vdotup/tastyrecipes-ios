@@ -16,21 +16,37 @@ final class TastyRecipesUITests: XCTestCase {
     }
 
     func testRecipeNavigationFlow() {
-        let list = app.collectionViews["RecipeList"]
-        XCTAssertTrue(list.waitForExistence(timeout: 5))
-        let firstRecipe = list.cells.element(boundBy: 0)
+        let scrollView = app.scrollViews.firstMatch
+        XCTAssertTrue(scrollView.waitForExistence(timeout: 5), "Recipe scroll view did not appear in time.")
+        
+        let firstRecipe = scrollView.buttons["RecipeRow_1"]
+        XCTAssertTrue(firstRecipe.waitForExistence(timeout: 5), "First recipe did not appear in time.")
+        
         firstRecipe.tap()
-        XCTAssertTrue(app.images["RecipeHeaderImage"].exists)
-        XCTAssertTrue(app.staticTexts["Ingredients"].exists)
-        XCTAssertTrue(app.staticTexts["Instructions"].exists)
+        
+        XCTAssertTrue(app.images["RecipeHeaderImage"].waitForExistence(timeout: 5), "Recipe header image did not appear.")
+        XCTAssertTrue(app.staticTexts["Ingredients"].waitForExistence(timeout: 5), "Ingredients section did not appear.")
+        XCTAssertTrue(app.staticTexts["Instructions"].waitForExistence(timeout: 5), "Instructions section did not appear.")
+        
         app.navigationBars.buttons.element(boundBy: 0).tap()
     }
+
     
     func testSearchFunctionality() {
-        app.navigationBars["Recipes"].searchFields.element.tap()
-        app.typeText("Chicken")
+        let searchField = app.searchFields["RecipeSearchBar"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 5), "Search bar did not appear.")
+        
+        searchField.tap()
+        searchField.typeText("Chicken")
         app.keyboards.buttons["Search"].tap()
-        let results = app.collectionViews["SearchResults"]
-        XCTAssertTrue(results.waitForExistence(timeout: 5))
+        
+        let resultsList = app.tables.firstMatch
+        XCTAssertTrue(resultsList.waitForExistence(timeout: 5), "Search results did not appear.")
+        
+        let firstResult = resultsList.cells.element(boundBy: 0)
+        XCTAssertTrue(firstResult.waitForExistence(timeout: 5), "First search result did not appear.")
+        
+        firstResult.tap()
+        XCTAssertTrue(app.images["RecipeHeaderImage"].waitForExistence(timeout: 5), "Recipe header image did not appear after search.")
     }
 }
